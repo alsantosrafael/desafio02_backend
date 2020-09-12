@@ -11,22 +11,21 @@ const geraId = (produtos) => {
 }
 
 const mostraProdutos = (produtos) => {
-    let novosProdutos = null;
-    if(produtos.length!==0) {
-        novosProdutos = produtos.map(produto => {
-            if(!produto.deletado) {
-                return produto
-            }
-        })
-    }
-    return novosProdutos;
+    const produtosDisponiveis = []
+
+    produtos.forEach(produto => {
+        if(!produto.deletado && produto.quantidade !== 0) {
+            produtosDisponiveis.push(produto)
+        }
+    } )
+    return produtosDisponiveis
 }
 
 const procuraProduto = (id, produtos) => {
-    let produto = null;
+    let produto = {}
     if(produtos.length !==0 ) {
         produto = produtos.reduce((prod,produtoAtual,index) => {
-            if(produtoAtual.id === id && !produtoAtual.deletado) {
+            if(produtoAtual.id === id && !produtoAtual.deletado && produto.quantidade !== 0) {
                 prod = produtoAtual;
             }
             return {
