@@ -22,6 +22,7 @@ server.use(ctx => {
 
           const id = Number(ctx.url.split("/:")[1])
           const produtoProcurado = pacProdutos.procuraProduto(id, produtos)
+          console.log(produtoProcurado)
           if(!id) {
             ctx.status = 400;
             ctx.body = {
@@ -61,7 +62,8 @@ server.use(ctx => {
                   }
                 }
             } else if (ctx.method === 'DELETE') {
-              if(produtos[produtoProcurado.index].deletado){
+              console.log(produtos)
+              if(produtos[id-1].deletado){
                 ctx.status = 404;
                 ctx.body = {
                   status: "Erro",
@@ -71,7 +73,7 @@ server.use(ctx => {
                   }
                 }
               } else {
-                produtos[produtoProcurado.index].deletado = true
+                produtos[(id-1)].deletado = true
                 ctx.status = 200;
                 ctx.body = {
                   status: "Sucesso!",
@@ -171,7 +173,7 @@ server.use(ctx => {
                   }
                 };
               } else {
-                ctx.status = 201;
+                ctx.status = 200;
                 ctx.body = {
                   status: "Sucesso!",
                   dados: {
