@@ -10,9 +10,19 @@ const geraId = (produtos) => {
     return id;
 }
 
+const mostraProdutos = (produtos) => {
+    const novosProdutos = produtos.map(produto => {
+        if(!produto.deletado) {
+            return produto
+        }
+    })
+    return novosProdutos;
+}
+
 
 
 
 module.exports = {
-    geraId: geraId
+    geraId: geraId,
+    mostraProdutos: mostraProdutos,
 }
