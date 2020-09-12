@@ -11,12 +11,31 @@ const geraId = (produtos) => {
 }
 
 const mostraProdutos = (produtos) => {
-    const novosProdutos = produtos.map(produto => {
-        if(!produto.deletado) {
-            return produto
-        }
-    })
+    let novosProdutos = null;
+    if(produtos.length!==0) {
+        novosProdutos = produtos.map(produto => {
+            if(!produto.deletado) {
+                return produto
+            }
+        })
+    }
     return novosProdutos;
+}
+
+const procuraProduto = (id, produtos) => {
+    let produto = null;
+    if(produtos.length !==0 ) {
+        produto = produtos.reduce((prod,produtoAtual,index) => {
+            if(produtoAtual.id === id && !produtoAtual.deletado) {
+                prod = produtoAtual;
+            }
+            return {
+                prod,
+                index
+            }
+        },0)
+    }
+    return produto
 }
 
 
@@ -25,4 +44,5 @@ const mostraProdutos = (produtos) => {
 module.exports = {
     geraId: geraId,
     mostraProdutos: mostraProdutos,
+    procuraProduto: procuraProduto,
 }
