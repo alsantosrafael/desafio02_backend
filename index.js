@@ -5,10 +5,12 @@ const bodyparser = require("koa-bodyparser");
 const server = new Koa();
 
 const pacProdutos = require("./produtos.js")
+const pacPedidos = require("./pedidos.js")
 
 
 //Declarando variáveis
 const produtos = [];
+const pedidos = []
 
 //Convertendo informação
 server.use(bodyparser())
@@ -22,7 +24,7 @@ server.use(ctx => {
 
           const id = Number(ctx.url.split("/:")[1])
           const produtoProcurado = pacProdutos.procuraProduto(id, produtos)
-          console.log(produtoProcurado)
+
           if(!id) {
             ctx.status = 400;
             ctx.body = {
@@ -43,7 +45,7 @@ server.use(ctx => {
               }
             } else {
               if(ctx.method === 'GET') {
-                if(!produtoProcurado.prod) {
+                if(!produtoProcurado) {
                   ctx.status = 404;
                   ctx.body = {
                     status: "Erro",
@@ -57,12 +59,12 @@ server.use(ctx => {
                     status: "Sucesso!",
                     dados: {
                       mensagem: "Produto encontrado.",
-                      conteudo: produtoProcurado.prod
+                      conteudo: produtoProcurado
                     }
                   }
                 }
             } else if (ctx.method === 'DELETE') {
-              console.log(produtos)
+
               if(produtos[id-1].deletado){
                 ctx.status = 404;
                 ctx.body = {
@@ -79,12 +81,12 @@ server.use(ctx => {
                   status: "Sucesso!",
                   dados: {
                     mensagem: "Produto deletado com sucesso.",
-                    conteudo: produtoProcurado.prod
+                    conteudo: produtoProcurado
                   }
                 }
               }
             } else if(ctx.method === 'PUT') {
-              if(produtos[produtoProcurado.index].deletado){
+              if(produtos[(id-1)].deletado){
                 ctx.status = 404;
                 ctx.body = {
                   status: "Erro",
@@ -94,21 +96,21 @@ server.use(ctx => {
                   }
                 }
               } else {
-                (produtos[produtoProcurado.index].nome = !ctx.request.body.nome 
-                  ? produtos[produtoProcurado.index].nome
+                (produtos[(id-1)].nome = !ctx.request.body.nome 
+                  ? produtos[(id-1)].nome
                   : ctx.request.body.nome),
-                (produtos[produtoProcurado.index].valor = !ctx.request.body.valor
-                  ? produtos[produtoProcurado.index].valor
-                  : ctx.request.body.valor),
-                (produtos[produtoProcurado.index].quant = !ctx.request.body.valor
-                  ? produtos[produtoProcurado.index].quant
-                  : ctx.request.body.quant)
+                (produtos[(id-1)].valor = !ctx.request.body.valor
+                  ? produtos[(id-1)].valor
+                  : Number(ctx.request.body.valor)),
+                (produtos[(id-1)].quant = !ctx.request.body.valor
+                  ? produtos[(id-1)].quant
+                  : Number(ctx.request.body.quant))
                   ctx.status = 200
                   ctx.body = {
                     status: "Sucesso!",
                     dados: {
                       mensagem: "Produto alterado com sucesso.",
-                      conteudo: produtos[produtoProcurado.index]
+                      conteudo: produtos[(id-1)]
                     }
                   }
                 }
@@ -162,7 +164,7 @@ server.use(ctx => {
                   descricao: "Não há produtos cadastrados"
                 }
               };
-            } else {//TENDO PROBLEMAS COM O RETORNO DOS PRODUTOS ELE RETORNA os NULL
+            } else {
               if(produtosOrganizados.length === 0) {
                 ctx.status = 404;
                 ctx.body = {
@@ -193,7 +195,32 @@ server.use(ctx => {
           },
         };
       }
-    } else {
+    } else if (ctx.url.includes("/pedidos")){
+      if(ctx.url.includes("/pedidos/:")) {
+        ctx.body = 'Chegou aqui'
+
+      } else if(ctx.method === 'POST') {//PENSAR NA FILTRAGEM
+        pedidos.push({
+          id: pacPedidos.geraId(pedidos),
+          produtos: ctx.request.body.nome,
+          estado: 'incompleto',
+          idCliente: Math.floor(Math.random()*100),
+          quant: Number(ctx.request.body.quant),
+          deletado: false,
+          valorTotal: '',//ALTERAR
+      })
+      ctx.status = 201;
+      ctx.body = {
+        status: "Sucesso!",
+        dados: {
+          mensagem: "Pedido registrado com sucesso.",
+          conteudo: pedidos[pedidos.length - 1]
+        },
+      };
+
+      }
+      
+    }else {
         ctx.status = 404;
         ctx.body = {
           status: "Erro",

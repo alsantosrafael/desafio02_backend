@@ -1,4 +1,4 @@
-//Funcionalides para produtos
+//Funcionalides referentes à entidade "Produto"
 
 const geraId = (produtos) => {
     let id;
@@ -24,14 +24,11 @@ const mostraProdutos = (produtos) => {
 const procuraProduto = (id, produtos) => {
     let produto = {}
     if(produtos.length !==0 ) {
-        produto = produtos.reduce((prod,produtoAtual,index) => {
+        produto = produtos.reduce((prod,produtoAtual) => {
             if(produtoAtual.id === id && !produtoAtual.deletado && produto.quantidade !== 0) {
                 prod = produtoAtual;
             }
-            return {
-                prod,
-                index
-            }
+            return prod
         },0)
     }
     return produto
