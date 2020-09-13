@@ -22,13 +22,13 @@ const mostraProdutos = (produtos) => {
 }
 
 const procuraProduto = (id, produtos) => {
-    let produto = {}
+    let produto = 0
     if(produtos.length !==0 ) {
         produto = produtos.reduce((prod,produtoAtual) => {
             if(produtoAtual.id === id && !produtoAtual.deletado && produto.quantidade !== 0) {
                 prod = produtoAtual;
             }
-            return prod
+            return prod;
         },0)
     }
     return produto

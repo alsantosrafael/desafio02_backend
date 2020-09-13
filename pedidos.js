@@ -23,16 +23,17 @@ const mostraPedidos = (produtos) => {
 }
 
 const procuraPedido = (id, pedidos) => {
-    let pedido = {}
+    let pedido = 0
     if(pedidos.length !== 0) {
-        produto = produtos.reduce((ped,pedidoAtual) => {
-            if(pedidoAtual.id === id && !produtoAtual.deletado) {
-                ped = produtoAtual;
+        pedido = pedidos.reduce((ped,pedidoAtual) => {
+            if(pedidoAtual.id === id && !pedidoAtual.deletado && pedidoAtual.estado !== 'cancelado') {
+                ped = pedidoAtual;
             }
             return ped
         },0)
     }
-    return produto
+    
+    return pedido
 }
 
 
