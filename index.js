@@ -8,9 +8,9 @@ const pacProdutos = require("./produtos.js")
 const pacPedidos = require("./pedidos.js")
 
 
-//Declarando variáveis
+//Declarando variáveis de lista
 const produtos = [];
-const pedidos = []
+const pedidos = [];
 
 //Convertendo informação
 server.use(bodyparser())
@@ -152,8 +152,8 @@ server.use(ctx => {
               dados: {
                 mensagem: "Conteúdo não encontrado.",
                 descricao:"Não há produtos cadastrados."
-              },
-            };
+              }
+            }
           } else {
             if(produtos.length === 0) {
               ctx.status = 404;
@@ -202,12 +202,11 @@ server.use(ctx => {
       } else if(ctx.method === 'POST') {//PENSAR NA FILTRAGEM
         pedidos.push({
           id: pacPedidos.geraId(pedidos),
-          produtos: ctx.request.body.nome,
+          produtos: {},
           estado: 'incompleto',
           idCliente: Math.floor(Math.random()*100),
-          quant: Number(ctx.request.body.quant),
           deletado: false,
-          valorTotal: '',//ALTERAR
+          valorTotal: 0,
       })
       ctx.status = 201;
       ctx.body = {
@@ -215,12 +214,50 @@ server.use(ctx => {
         dados: {
           mensagem: "Pedido registrado com sucesso.",
           conteudo: pedidos[pedidos.length - 1]
-        },
-      };
-
-      }
-      
-    }else {
+          }
+        }
+      } else if(ctx.method === 'GET') {
+        const pedidosAtivos = pacPedidos.mostraPedidos(pedidos);
+        if(!pedidosAtivos) {
+          ctx.status = 404;
+          ctx.body = {
+            status: "Erro",
+            dados: {
+              mensagem: "Conteúdo não encontrado.",
+              descricao:"Não há pedidos cadastrados."
+            }
+          }
+        } else {
+            if(pedidosAtivos.length === 0 || pedidos.length === 0){
+              ctx.status = 404;
+              ctx.body = {
+                status: "Erro",
+                dados: {
+                  mensagem: "Conteúdo não encontrado.",
+                  descricao:"Não há pedidos cadastrados."
+                }
+              }
+            } else {
+                ctx.status = 200;
+                ctx.body = {
+                  status: "Sucesso!",
+                  dados: {
+                    mensagem: "Pedidos encontrados.",
+                    conteudo: pedidosAtivos
+                    }
+                  }
+                }
+              }
+            }else {
+              ctx.status = 404;
+              ctx.body = {
+                status: "Erro",
+                dados: {
+                  mensagem: "Conteúdo não encontrado.",
+                },
+              }
+            }
+      }else {
         ctx.status = 404;
         ctx.body = {
           status: "Erro",
