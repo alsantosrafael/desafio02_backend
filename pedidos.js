@@ -11,14 +11,21 @@ const geraId = (pedidos) => {
     return id;
 }
 
-const mostraPedidos = (produtos) => {
+const mostraPedidos = (produtos, query) => {
     const pedidosDisponiveis = []
-
-    produtos.forEach(pedido => {
-        if(!pedido.deletado) {
-            pedidosDisponiveis.push(pedido)
-        }
-    } )
+    if(query === undefined){
+        produtos.forEach(pedido => {
+            if(!pedido.deletado) {
+                pedidosDisponiveis.push(pedido)
+            }
+        })
+    } else {
+        produtos.forEach(pedido => {
+            if(!pedido.deletado && pedido.estado === query) {
+                pedidosDisponiveis.push(pedido);
+            }
+        })
+    }
     return pedidosDisponiveis
 }
 
@@ -36,9 +43,44 @@ const procuraPedido = (id, pedidos) => {
     return pedido
 }
 
+const addProduto = (produto, pedido, pedidos) => {
+    let resposta;
+    //Existe produto X?
+    //Ele está com status deletadoX?
+    //Se existir produto, ele já foi adicionado a pedidos?
+    //Se não foi adicionado, adicionar
+    //se já foi adicionado, alterar quantidade
+
+    //uso a função para achar o produto
+    //uso a outra função para achar o pedido
+
+    if(!produto || !pedido) {
+        resposta = false;
+        return resposta
+    } else {
+        pedidos.forEach((ped, index) => {
+            for(let i = 0; i < ped.produtos.length; i++) {
+                if(ped.estado !== 'incompleto') {
+                    return resposta;
+                } else {
+                    if(Number(ped.produtos[i].id) === Number(produto.id)) {
+                        pedidos[index].produtos[i].quant += produto.quant
+                    } else {
+                        pedidos.produtos.push(produto)
+                    }
+                    resposta = true;
+                }
+            }
+        })
+    }
+    return resposta;
+}
+
 
 module.exports = {
     geraId: geraId,
     mostraPedidos: mostraPedidos,
-    procuraPedido: procuraPedido
+    procuraPedido: procuraPedido,
+    addProduto: addProduto,
+
 }

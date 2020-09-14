@@ -3,7 +3,7 @@ const Koa = require("koa");
 const bodyparser = require("koa-bodyparser");
 
 const server = new Koa();
-
+//Pacotes de funções externas feitas por mim
 const pacProdutos = require("./produtos.js");
 const pacPedidos = require("./pedidos.js");
 
@@ -211,30 +211,75 @@ server.use((ctx) => {
             ctx.body = {
               status: "Erro",
               dados: {
-                mensagem: "Produto não encontrado.",
+                mensagem: "Pedido não encontrado.",
               },
             };
           } else {
             if(ctx.method === 'GET') {
-              if(pedidoProcurado === {}) {
-                ctx.status = 404;
-                ctx.body = {
-                  status: "Erro",
-                  dados: {
-                    mensagem: "Produto não encontrado.",
-                  },
-                };
-              } else{
-                console.log(pedidoProcurado)
                 ctx.status = 200;
                 ctx.body = {
                   status: "Sucesso!",
                   dados: {
-                    mensagem: "Produto encontrado.",
+                    mensagem: "Pedido encontrado.",
                     conteudo: pedidoProcurado,
                   },
                 };
-              }
+            } else if(ctx.method === 'PUT') {//ADICIONAR PRODUTO À LISTA - PRECISA DE ATENÇÃO INCOMPLETOOOO
+              //JSON q a gnt vai passar o idProduto
+              const prodASerAdd = pacProdutos.procuraProduto(Number(ctx.request.body.idProduto),produtos)
+              const adicionado = pacPedidos.addProduto(prodASerAdd,pedidoProcurado, pedidos)
+              if(!prodASerAdd) {
+                ctx.status = 404
+                ctx.body = {
+                  status: "Erro",
+                  dados: {
+                    mensagem: "Pedido ou produto não encontrado.",
+                  },
+                };
+              } else {
+                console.log(prodASerAdd)
+                console.log(adicionado)
+                if(!adicionado) {
+                  ctx.status = 400
+                  ctx.body = {
+                    status: "Erro",
+                    dados: {
+                        mensagem: "Requisição mal-formatada.",
+                        descricao: "Produto ou pedido inserido não existe"
+                      }
+                    }
+                  } else {
+                    ctx.status = 200;
+                    ctx.body = {
+                      status: "Sucesso!",
+                      dados: {
+                        mensagem: "Produto adicionado ao pedido com sucesso.",
+                        conteudo: pedidos[id-1],//ALTERAR
+                      },
+                    };
+                  }
+                }
+            } else if(ctx.method === 'DELETE') {
+              if(pedidos[id-1].deletado === true) {
+                ctx.status = 404
+                ctx.body = {
+                  status: "Erro",
+                  dados: {
+                    mensagem: "Pedido não encontrado.",
+                    descri: "Pedido nunca cadastrado ou já foi deletado."
+                  },
+                };
+              } else {
+                pedidos[id-1].deletado = true
+                ctx.status = 200;
+                    ctx.body = {
+                      status: "Sucesso!",
+                      dados: {
+                        mensagem: "Pedido deletado com sucesso.",
+                        conteudo: pedidos[id-1]
+                      },
+                    };
+                  }
             } else {
               ctx.status = 400;
               ctx.body = {
@@ -247,11 +292,11 @@ server.use((ctx) => {
             }
           }
         }
-    } else if (ctx.method === "POST") {
+    }else if (ctx.method === "POST") {
       //PENSAR NA FILTRAGEM
       pedidos.push({
         id: pacPedidos.geraId(pedidos),
-        produtos: {},
+        produtos: [],
         estado: "incompleto",
         idCliente: Math.floor(Math.random() * 100),
         deletado: false,
@@ -266,7 +311,8 @@ server.use((ctx) => {
         },
       };
     } else if (ctx.method === "GET") {
-      const pedidosAtivos = pacPedidos.mostraPedidos(pedidos);
+      const query = ctx.query.estado;
+      const pedidosAtivos = pacPedidos.mostraPedidos(pedidos, query);
       if (!pedidosAtivos) {
         ctx.status = 404;
         ctx.body = {
@@ -287,22 +333,32 @@ server.use((ctx) => {
             },
           };
         } else {
-          ctx.status = 200;
-          ctx.body = {
-            status: "Sucesso!",
-            dados: {
-              mensagem: "Pedidos encontrados.",
-              conteudo: pedidosAtivos,
-            },
-          };
+          if(query !== undefined && (query !== 'entregue' || query !== 'pago' || query !== 'processando' || query !== 'cancelado')) {
+            ctx.status = 400;
+            ctx.body = {
+              status: "Erro",
+              dados: {
+                mensagem: "Pedido mal-formatado.",
+              },
+            };
+          } else {
+            ctx.status = 200;
+            ctx.body = {
+              status: "Sucesso!",
+              dados: {
+                mensagem: "Pedidos encontrados.",
+                conteudo: pedidosAtivos,
+              },
+            };
+          }
         }
       }
     } else {
-      ctx.status = 404;
+      ctx.status = 400;
       ctx.body = {
         status: "Erro",
         dados: {
-          mensagem: "Conteúdo não encontrado.",
+          mensagem: "Pedido mal-formatado.",
         },
       };
     }
