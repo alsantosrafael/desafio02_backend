@@ -23,7 +23,9 @@ const mostraProdutos = (produtos) => {
 
 const procuraProduto = (id, produtos) => {
     let produto = 0
-    if(produtos.length !==0 ) {
+    if(produtos === undefined || produtos.length === 0) {
+        return false;
+    } else {
         produto = produtos.reduce((prod,produtoAtual) => {
             if(produtoAtual.id === id && !produtoAtual.deletado && produto.quantidade !== 0) {
                 prod = produtoAtual;

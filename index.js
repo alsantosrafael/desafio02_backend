@@ -142,6 +142,7 @@ server.use((ctx) => {
       };
     } else if (ctx.method === "GET") {
       const produtosOrganizados = pacProdutos.mostraProdutos(produtos);
+      console.log(produtosOrganizados)
       if (!produtosOrganizados) {
         ctx.status = 404;
         ctx.body = {
@@ -225,38 +226,84 @@ server.use((ctx) => {
                   },
                 };
             } else if(ctx.method === 'PUT') {//ADICIONAR PRODUTO À LISTA - PRECISA DE ATENÇÃO INCOMPLETOOOO
-              //JSON q a gnt vai passar o idProduto
-              const prodASerAdd = pacProdutos.procuraProduto(Number(ctx.request.body.idProduto),produtos)
-              const adicionado = pacPedidos.addProduto(prodASerAdd,pedidoProcurado, pedidos)
-              if(!prodASerAdd) {
-                ctx.status = 404
-                ctx.body = {
-                  status: "Erro",
-                  dados: {
-                    mensagem: "Pedido ou produto não encontrado.",
-                  },
-                };
-              } else {
-                console.log(prodASerAdd)
-                console.log(adicionado)
-                if(!adicionado) {
-                  ctx.status = 400
-                  ctx.body = {
+              // q a gnt vai passar o idProduto e a quantidade TEM QUE AJEITAR A FUNÇÂO addProduto
+              
+              const prod = pacProdutos.procuraProduto(Number(ctx.request.body.idProduto), produtos)
+              const ped = pacPedidos.procuraPedido(Number(ctx.url.split("/:")[1]), pedidos)
+              const adicionado = pacPedidos.addProduto(prod, Number(ctx.request.body.quant), produtos, ped.id, ped, pedidos)
+              //const adicionado = pacPedidos.addProduto(idProd, pedidoProcurado, pedidos)
+              //const pedido = pacPedidos.procuraPedido(Number(ctx.url.split("/:")[1]))
+              const estado = ctx.request.body.estado;
+              if(!prod && !estado) {
+                 ctx.status = 404
+                 ctx.body = {
+                   status: "Erro",
+                   dados: {
+                     mensagem: "Produto não encontrado.",
+                   },
+                 };
+                }else {
+                  if(!ped && !estado) {
+                   ctx.status = 404
+                   ctx.body = {
                     status: "Erro",
                     dados: {
-                        mensagem: "Requisição mal-formatada.",
-                        descricao: "Produto ou pedido inserido não existe"
+                        mensagem: "Pedido não encontrado."
                       }
                     }
                   } else {
-                    ctx.status = 200;
-                    ctx.body = {
-                      status: "Sucesso!",
-                      dados: {
-                        mensagem: "Produto adicionado ao pedido com sucesso.",
-                        conteudo: pedidos[id-1],//ALTERAR
-                      },
-                    };
+                    if(!adicionado && !estado) {
+                      ctx.status = 400
+                      ctx.body = {
+                       status: "Erro",
+                       dados: {
+                           mensagem: "Pedido mal-formatado.",
+                           descricao: "Ausência de dados"
+                         }
+                       }
+                    } else {
+                      if(!estado && adicionado && pedidos[ped.id-1].estado === 'incompleto'){
+                        ctx.status = 200;
+                        pedidos[ped.id-1].valorTotal = pacPedidos.calculaTotal(ped.id, pedidos)
+                        ctx.body = {
+                          status: "Sucesso!",
+                          dados: {
+                            mensagem: "Produto adicionado ao pedido com sucesso.",
+                            conteudo: pedidos[ped.id-1]
+                          },
+                        };
+                      } else if(!adicionado && estado) {
+                        ctx.status = 200;
+                        pedidos[ped.id-1].estado = estado
+                        ctx.body = {
+                          status: "Sucesso!",
+                          dados: {
+                            mensagem: "Pedido teve seu status alterado com sucesso.",
+                            conteudo: pedidos[ped.id-1]
+                          },
+                        };
+                      } else if(pedidos[ped.id-1].estado === 'incompleto') {
+                        ctx.status = 200;
+                        pedidos[ped.id-1].estado = estado
+                        pedidos[ped.id-1].valorTotal = pacPedidos.calculaTotal(ped.id, pedidos)
+                        ctx.body = {
+                          status: "Sucesso!",
+                          dados: {
+                            mensagem: "Produto adicionado ao pedido e estado alterado com sucesso.",
+                            conteudo: pedidos[ped.id-1]
+                          },
+                        };
+                      } else {
+                        ctx.status = 400
+                        ctx.body = {
+                         status: "Erro",
+                         dados: {
+                             mensagem: "Pedido mal-formatado.",
+                             descricao: "Adiciona-se itens ao pedido apenas enquanto seu estado for 'incompleto'."
+                           }
+                         }
+                      }
+                    }
                   }
                 }
             } else if(ctx.method === 'DELETE') {
@@ -300,7 +347,7 @@ server.use((ctx) => {
         estado: "incompleto",
         idCliente: Math.floor(Math.random() * 100),
         deletado: false,
-        valorTotal: 0,
+        valorTotal: 0
       });
       ctx.status = 201;
       ctx.body = {
@@ -372,7 +419,7 @@ server.use((ctx) => {
     };
   }
 });
-
+//Liberando porta para servidor
 server.listen(8081, () => {
-  console.log("Server rodando na porta 8081");
+  console.log("Server rodando na porta 8081.");
 });
