@@ -225,14 +225,12 @@ server.use((ctx) => {
                     conteudo: pedidoProcurado,
                   },
                 };
-            } else if(ctx.method === 'PUT') {//ADICIONAR PRODUTO À LISTA - PRECISA DE ATENÇÃO INCOMPLETOOOO
-              // q a gnt vai passar o idProduto e a quantidade TEM QUE AJEITAR A FUNÇÂO addProduto
-              
+            } else if(ctx.method === 'PUT') {
+
               const prod = pacProdutos.procuraProduto(Number(ctx.request.body.idProduto), produtos)
               const ped = pacPedidos.procuraPedido(Number(ctx.url.split("/:")[1]), pedidos)
               const adicionado = pacPedidos.addProduto(prod, Number(ctx.request.body.quant), produtos, ped.id, ped, pedidos)
-              //const adicionado = pacPedidos.addProduto(idProd, pedidoProcurado, pedidos)
-              //const pedido = pacPedidos.procuraPedido(Number(ctx.url.split("/:")[1]))
+
               const estado = ctx.request.body.estado;
               if(!prod && !estado) {
                  ctx.status = 404
@@ -340,7 +338,7 @@ server.use((ctx) => {
           }
         }
     }else if (ctx.method === "POST") {
-      //PENSAR NA FILTRAGEM
+
       pedidos.push({
         id: pacPedidos.geraId(pedidos),
         produtos: [],
