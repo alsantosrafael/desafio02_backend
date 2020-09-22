@@ -111,7 +111,7 @@ server.use((ctx) => {
               };
             }
           } else {
-            //NÃO SEI SE ESSE ELSE É NECESSÁRIO
+
             ctx.status = 400;
             ctx.body = {
               status: "Erro",
@@ -124,7 +124,7 @@ server.use((ctx) => {
         }
       }
     } else if (ctx.method === "POST") {
-      //ADICIONAR FILTRO PARA NÃO DEIXAR O USUARIO CRIAR UM PRODUTO VAZIO
+
       produtos.push({
         id: pacProdutos.geraId(produtos),
         nome: ctx.request.body.nome,
